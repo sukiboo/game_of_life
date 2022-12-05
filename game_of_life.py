@@ -19,7 +19,7 @@ class GameOfLife:
     UPDUPD: alright I created the repo
     """
 
-    def __init__(self, show_model=True, colors=['#ffffff','#f06923']):
+    def __init__(self, show_model=False, colors=['#ffffff','#f06923']):
         """Initialize class variables"""
         self.setup_model()
         if show_model:
@@ -27,31 +27,23 @@ class GameOfLife:
             self.print_model_weights()
         self.setup_predefined_states()
         self.cmap = clr.ListedColormap(colors)
-        ##os.makedirs('./data/', exist_ok=True)
 
     def setup_model(self):
         """Create the Game-of-Life model"""
-        self.model = tf.keras.models.Sequential(name='game_of_life')
-        self.model.add(tf.keras.Input(shape=(None,None,1)))
         const = tf.keras.initializers.constant
-        # convolutional layer
-        self.model.add(tf.keras.layers.Conv2D(
-            filters=2, kernel_size=(3,3), padding='same',
-            name='conv', trainable=False, dynamic=True,
-            kernel_initializer=const([0,1,0,1,0,1,0,1,1,0,0,1,0,1,0,1,0,1]),
-            bias_initializer=const([0,0])))
-        # fully connected layer 1
-        self.model.add(tf.keras.layers.Dense(
-            units=2, activation='relu',
-            name='fc1', trainable=False, dynamic=True,
-            kernel_initializer=const([0,-1,1,-1]),
-            bias_initializer=const([-3,3])))
-        # fully connected layer 2
-        self.model.add(tf.keras.layers.Dense(
-            units=1, activation='relu',
-            name='fc2', trainable=False, dynamic=True,
-            kernel_initializer=const([-1,-1]),
-            bias_initializer=const([1])))
+        self.model = tf.keras.models.Sequential([
+            tf.keras.Input(shape=(None,None,1)),
+            # convolutional layer
+            tf.keras.layers.Conv2D(filters=2, kernel_size=(3,3), padding='same',
+                name='conv', trainable=False, dynamic=True, activation='relu',
+                kernel_initializer=const([1,-1,1,-1,1,-1,1,-1,0,-1,1,-1,1,-1,1,-1,1,-1]),
+                bias_initializer=const([-3,3])),
+            # fully connected layer
+            tf.keras.layers.Dense(units=1, activation='relu',
+                name='fc', trainable=False, dynamic=True,
+                kernel_initializer=const([-1,-1]),
+                bias_initializer=const([1]))],
+            name='game_of_life')
         # initialize model weights
         self.state = np.eye(3)
         self.step()
@@ -61,10 +53,12 @@ class GameOfLife:
         layers = self.model.layers
         print('\nconv weights:')
         print(np.squeeze(layers[0].get_weights()[0]).transpose(2,0,1))
-        print('\nfc1 weights:')
-        print(layers[1].get_weights()[0], layers[1].get_weights()[1], sep='\n ')
-        print('\nfc2: weights')
-        print(layers[2].get_weights()[0], layers[2].get_weights()[1], sep='\n ')
+        print('\nconv biases:')
+        print(' ', layers[0].get_weights()[1])
+        print('\nfc weights:')
+        print(layers[1].get_weights()[0])
+        print('\nfc biases:')
+        print('', layers[1].get_weights()[1])
 
     def step(self):
         """Advance time in a simulation by one step"""
@@ -129,20 +123,27 @@ class GameOfLife:
             for state in states:
                 gif.append_data(imageio.imread(state))
 
-    def generate_dataset(self, board_size=(32,32), num_sim=10, steps=100):
+    def generate_dataset_old(self, board_size=(32,32), num_sim=10, steps=100):
         """Create a dataset consisting of multiple simulations"""
         for sim in range(num_sim):
             name = f'datasets/{board_size[0]}x{board_size[1]}_{sim}'
             self.setup_state(init=sim, board_size=board_size)
             self.play(steps=steps, name=name)
 
+    def generate_dataset(self, board_size=(32,32), num=100, random_seed=0):
+        """Create a dataset consisting of multiple simulations"""
+        np.random.seed(random_seed)
+        X = np.random.randint(2, size=(num,*board_size,1)).astype(np.float32)
+        Y = self.model(X).numpy()
+        return (X, Y)
+
 
 if __name__ == '__main__':
-    # run a sample simulation
+
     life = GameOfLife(show_model=True)
 
-    life.setup_state(init=0)
-    life.play()
+    ##life.setup_state(init=0)
+    ##life.play()
 
-    ##life.generate_dataset()
+    x, y = life.generate_dataset()
 
