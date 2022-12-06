@@ -33,15 +33,15 @@ class GameOfLife:
         const = tf.keras.initializers.constant
         self.model = tf.keras.models.Sequential([
             tf.keras.Input(shape=(None,None,1)),
-            # convolutional layer
+            # convolutional layer 1
             tf.keras.layers.Conv2D(filters=2, kernel_size=(3,3), padding='same',
-                name='conv', trainable=False, dynamic=True, activation='relu',
+                name='conv1', trainable=False, dynamic=True, activation='relu',
                 kernel_initializer=const([1,-1,1,-1,1,-1,1,-1,0,-1,1,-1,1,-1,1,-1,1,-1]),
                 bias_initializer=const([-3,3])),
-            # fully connected layer
-            tf.keras.layers.Dense(units=1, activation='relu',
-                name='fc', trainable=False, dynamic=True,
-                kernel_initializer=const([-1,-1]),
+            # convolutional layer 2
+            tf.keras.layers.Conv2D(filters=1, kernel_size=(3,3), padding='same',
+                name='conv2', trainable=False, dynamic=True, activation='relu',
+                kernel_initializer=const([0,0,0,0,0,0,0,0,-1,-1,0,0,0,0,0,0,0,0]),
                 bias_initializer=const([1]))],
             name='game_of_life')
         # initialize model weights
@@ -51,14 +51,14 @@ class GameOfLife:
     def print_model_weights(self):
         """Display the network architecture and weights"""
         layers = self.model.layers
-        print('\nconv weights:')
+        print('\nconv1 weights:')
         print(np.squeeze(layers[0].get_weights()[0]).transpose(2,0,1))
-        print('\nconv biases:')
+        print('\nconv1 biases:')
         print(' ', layers[0].get_weights()[1])
-        print('\nfc weights:')
-        print(layers[1].get_weights()[0])
-        print('\nfc biases:')
-        print('', layers[1].get_weights()[1])
+        print('\nconv2 weights:')
+        print(np.squeeze(layers[1].get_weights()[0]).transpose(2,0,1))
+        print('\nconv2 biases:')
+        print(' ', layers[1].get_weights()[1])
 
     def step(self):
         """Advance time in a simulation by one step"""
@@ -100,7 +100,7 @@ class GameOfLife:
     def setup_predefined_states(self):
         """Create a dictionary of predefined initial states"""
         self.predefined_states = {
-            'glider': [(9,9), (0,0), (1,1), (1,2), (2,0), (2,1)],
+            'glider': [(8,8), (0,0), (1,1), (1,2), (2,0), (2,1)],
             'lwss': [(9,27), (1,1), (1,4), (2,5), (3,1), (3,5), (4,2), (4,3), (4,4), (4,5)],
             'mwss': [(9,27), (1,3), (2,1), (2,5), (3,6), (4,1), (4,6), (5,2), (5,3), (5,4),
                      (5,5), (5,6)],
@@ -141,9 +141,9 @@ class GameOfLife:
 if __name__ == '__main__':
 
     life = GameOfLife(show_model=True)
-
-    ##life.setup_state(init=0)
-    ##life.play()
-
     x, y = life.generate_dataset()
+
+    ##life.setup_state(init='glider')
+    ##life.play(name='glider')
+    ##life.animate_game(name='glider')
 
