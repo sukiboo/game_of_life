@@ -39,9 +39,9 @@ class GameOfLife:
                 kernel_initializer=const([1,-1,1,-1,1,-1,1,-1,0,-1,1,-1,1,-1,1,-1,1,-1]),
                 bias_initializer=const([-3,3])),
             # convolutional layer 2
-            tf.keras.layers.Conv2D(filters=1, kernel_size=(3,3), padding='same',
+            tf.keras.layers.Conv2D(filters=1, kernel_size=(1,1), padding='same',
                 name='conv2', trainable=False, dynamic=True, activation='relu',
-                kernel_initializer=const([0,0,0,0,0,0,0,0,-1,-1,0,0,0,0,0,0,0,0]),
+                kernel_initializer=const([-1,-1]),
                 bias_initializer=const([1]))],
             name='game_of_life')
         # initialize model weights
