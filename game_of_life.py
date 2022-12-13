@@ -130,11 +130,13 @@ class GameOfLife:
             self.setup_state(init=sim, board_size=board_size)
             self.play(steps=steps, name=name)
 
-    def generate_dataset(self, board_size=(32,32), num=100, random_seed=0):
+    def generate_dataset(self, step=1, board_size=(32,32), num=100, random_seed=0):
         """Create a dataset consisting of multiple simulations"""
         np.random.seed(random_seed)
         X = np.random.randint(2, size=(num,*board_size,1)).astype(np.float32)
-        Y = self.model(X).numpy()
+        Y = X.copy()
+        for _ in range(step):
+            Y = self.model(Y).numpy()
         return (X, Y)
 
 
