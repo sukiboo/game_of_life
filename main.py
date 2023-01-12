@@ -1,51 +1,47 @@
 
-import numpy as np
-import tensorflow as tf
-
 from game_of_life import GameOfLife
+import models
 import visualization as viz
-
-np.set_printoptions(precision=3, suppress=True)
-tf.random.set_seed(0)
-
-
-def create_model(n):
-    '''construct feedforward convolutional network to learn n-step GoF'''
-    layers = [tf.keras.Input((None,None,1))]
-    for _ in range(n):
-        layers.append(tf.keras.layers.Conv2D(
-            2, kernel_size=(3,3), padding='same', activation='relu'))
-        layers.append(tf.keras.layers.Conv2D(
-            1, kernel_size=(1,1), padding='same', activation='relu'))
-    model = tf.keras.models.Sequential(layers)
-    return model
 
 
 if __name__ == '__main__':
 
     # number of steps in GoF
     n = 2
+    epochs = 100
 
     # generate train and test data
     life = GameOfLife()
     x_tr, y_tr = life.generate_dataset(step=n, num=10000, board_size=(32,32), random_seed=0)
     x_ts, y_ts = life.generate_dataset(step=n, num=1000, board_size=(32,32), random_seed=1)
+    data = ((x_tr,y_tr), (x_ts,y_ts))
 
-    # create model
-    model = create_model(n)
+    # ground truth model
+    model = models.get_ground_truth_model(n)
     print(model.summary())
-
-    # compile, train, evaluate model
-    model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
-    model.fit(x_tr, y_tr, batch_size=100, epochs=100)
-    model.evaluate(x_ts, y_ts)
-
-    # show results
     viz.print_model_weights(model)
 
-    # test model
-    life.setup_state('glider')
-    s = life.state
-    z = model(s.reshape(1,8,8,1)).numpy().squeeze()
-    print(s, z, sep='\n\n')
+    # train model via backpropagation
+    params_bp = {'name': 'Adam', 'learning_rate': 1e-3}
+    model_bp, history_bp = models.train_model_bp(n, data, epochs, params_bp)
+    ##viz.print_model_weights(model_bp)
+
+    # train model via genetic algorithm
+    params_ga = {'population': 100, 'parents': 10, 'sigma': .1}
+    model_ga, history_ga = models.train_model_ga(n, data, epochs, params_ga)
+    ##viz.print_model_weights(model_ga)
+
+    # train model via evolution strategy
+    params_es = {'population': 100, 'sigma': .1, 'learning_rate': 1e-2}
+    model_es, history_es = models.train_model_es(n, data, epochs, params_es)
+    ##viz.print_model_weights(model_es)
+
+    # train model via smoothing-based optimization
+    params_so = {'sigma': .1, 'learning_rate': 1e-2, 'num_quad': 5}
+    model_so, history_so = models.train_model_so(n, data, epochs, params_so)
+    ##viz.print_model_weights(model_so)
+
+    # visualize model training
+    viz.plot_history({'model_bp': history_bp, 'model_ga': history_ga,
+                      'model_es': history_es, 'model_so': history_so})
 

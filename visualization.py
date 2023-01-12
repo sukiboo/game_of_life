@@ -2,13 +2,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import time
 
-sns.set_theme(style='darkgrid', palette='muted', font='monospace', font_scale=1.2)
+sns.set_theme(style='darkgrid', palette='Paired', font='monospace', font_scale=1.2)
 
 
 def print_model_weights(model):
     """Display network architecture and weights"""
-    print(model.summary())
     print('\n\nmodel weights:')
     for layer in model.layers:
         print('kernel:')
@@ -39,5 +39,18 @@ def predict_glider(life, model):
     plt.grid(None)
     plt.setp(axs, xticks=[], yticks=[])
     plt.tight_layout()
+    plt.show()
+
+
+def plot_history(histories):
+    """Plot loss values"""
+    fig, ax = plt.subplots(figsize=(8,5))
+    for name, history in histories.items():
+        ax.plot(history['loss'], linewidth=3, label=name)
+        ax.plot(history['val_loss'], linewidth=3, linestyle='--')
+    ##ax.set_yscale('log')
+    ax.legend()
+    plt.tight_layout()
+    plt.savefig(f'./images/{int(time.time())}.png', dpi=300, format='png')
     plt.show()
 
