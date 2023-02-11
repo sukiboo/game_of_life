@@ -56,7 +56,7 @@ class GameOfLife:
         print('\nconv1 biases:')
         print(' ', layers[0].get_weights()[1])
         print('\nconv2 weights:')
-        print(np.squeeze(layers[1].get_weights()[0]).transpose(2,0,1))
+        print(np.squeeze(layers[1].get_weights()[0]))
         print('\nconv2 biases:')
         print(' ', layers[1].get_weights()[1])
 
@@ -130,12 +130,12 @@ class GameOfLife:
             self.setup_state(init=sim, board_size=board_size)
             self.play(steps=steps, name=name)
 
-    def generate_dataset(self, step=1, board_size=(32,32), num=100, random_seed=0):
+    def generate_dataset(self, steps=1, board_size=(32,32), num=100, random_seed=0):
         """Create a dataset consisting of multiple simulations"""
         np.random.seed(random_seed)
         X = np.random.randint(2, size=(num,*board_size,1)).astype(np.float32)
         Y = X.copy()
-        for _ in range(step):
+        for _ in range(steps):
             Y = self.model(Y).numpy()
         return (X, Y)
 
@@ -143,7 +143,7 @@ class GameOfLife:
 if __name__ == '__main__':
 
     life = GameOfLife(show_model=True)
-    x, y = life.generate_dataset()
+    x, y = life.generate_dataset(steps=1, board_size=(3,3))
 
     ##life.setup_state(init='glider')
     ##life.play(name='glider')

@@ -8,6 +8,7 @@ from evolution_strategy import EvolutionStrategy
 from smoothing_optimization import SmoothingOptimization
 
 
+
 def create_model(n, random_seed=0, name=None):
     """Construct feedforward convolutional network to learn n-step GoF"""
     tf.random.set_seed(random_seed)
@@ -32,6 +33,34 @@ def get_ground_truth_model(n):
     for layer in model.layers:
         layer.trainable = False
     return model
+
+
+##def create_model(n, random_seed=0, name=None):
+    ##"""same thing but repeating (conv1,conv2) n times"""
+    ##tf.random.set_seed(random_seed)
+    ##inputs = tf.keras.Input(shape=(None,None,1), name='input')
+    ##conv1 = tf.keras.layers.Conv2D(
+        ##2, kernel_size=(3,3), padding='same', activation='relu', name='conv1')
+    ##conv2 = tf.keras.layers.Conv2D(
+        ##1, kernel_size=(1,1), padding='same', activation='relu', name='conv2')
+    ##outputs = inputs
+    ##for _ in range(n):
+        ##outputs = conv2(conv1(outputs))
+    ##model = tf.keras.Model(inputs, outputs)
+    ##if name is not None:
+        ##model._name = name
+    ##return model
+
+
+##def get_ground_truth_model(n):
+    ##"""Create model that simulates n-step GoF"""
+    ##model = create_model(n, name=f'{n}-step GoF')
+    ##weights = [np.array([1,-1,1,-1,1,-1,1,-1,0,-1,1,-1,1,-1,1,-1,1,-1]).reshape(3,3,1,2),
+               ##np.array([-3,3]), np.array([-1,-1]).reshape(1,1,2,1), np.array([1])]
+    ##model.set_weights(weights)
+    ##for layer in model.layers:
+        ##layer.trainable = False
+    ##return model
 
 
 def train_model_bp(n, data, epochs, params):
