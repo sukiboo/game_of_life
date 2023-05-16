@@ -39,10 +39,15 @@ class EvolutionStrategy:
     def mutate_parents(self):
         '''Create a list of perturbed network weights'''
         self.model_weights = []
+        self.eps = []
         for i in range(self.population):
             weights = copy.deepcopy(self.weights)
+            Eps = []
             for weight in weights:
-                weight += self.sigma * np.random.randn(*weight.shape)
+                eps = np.random.randn(*weight.shape)
+                weight += self.sigma * eps
+                Eps.append(eps)
+            self.eps.append(Eps)
             self.model_weights.append(weights)
 
     def compute_fitness(self, model, training_data):
@@ -52,15 +57,19 @@ class EvolutionStrategy:
         for weights in self.model_weights:
             model.set_weights(weights)
             z = model(np.array(x, ndmin=2).reshape(-1,*x.shape[1:])).numpy()
-            fitness = 1 - np.mean((y - z)**2) / np.mean(y**2)
+            ##fitness = 1 - np.mean((y - z)**2) / np.mean(y**2)
+            fitness = 1 - 2*np.mean((y - z)**2)
             self.model_fitness.append(fitness)
 
     def truncate_population(self):
         '''Update weights based on their fitness'''
-        for weights, fitness in zip(self.model_weights, self.model_fitness):
+        for weights, fitness, eps in zip(self.model_weights, self.model_fitness, self.eps):
             for i in range(len(self.weights)):
-                change = (weights[i] - self.weights[i]) / self.sigma / self.population
-                self.weights[i] += self.learning_rate * change * fitness / self.sigma
+                ##change = (weights[i] - self.weights[i]) / self.population# / (self.sigma + 1e-6)
+                ##print(f'{np.linalg.norm(change):.2e}')
+                ##self.weights[i] += self.learning_rate * change * fitness / self.sigma
+                ##print(f'eps={np.mean(eps[i]): .2e}, fitness={fitness:.2e}')
+                self.weights[i] += self.learning_rate * fitness * eps[i] / (self.sigma * self.population)
 
     def evaluate_best(self, model, data):
         '''compute mse of the best model on the given data'''

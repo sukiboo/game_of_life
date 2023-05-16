@@ -130,22 +130,36 @@ class GameOfLife:
             self.setup_state(init=sim, board_size=board_size)
             self.play(steps=steps, name=name)
 
-    def generate_dataset(self, steps=1, board_size=(32,32), num=100, random_seed=0):
+    def generate_dataset(self, steps=1, board_size=(32,32), num=100,
+                         density=None, random_seed=None):
         """Create a dataset consisting of multiple simulations"""
-        np.random.seed(random_seed)
-        X = np.random.randint(2, size=(num,*board_size,1)).astype(np.float32)
+        # randomly sample initial states
+        if random_seed:
+            np.random.seed(random_seed)
+        if not density:
+            X = np.random.randint(2, size=(num,*board_size,1)).astype(np.float32)
+        else:
+            X = np.zeros(num * np.prod(board_size))
+            num_cells = X.size
+            num_alive = int(num_cells * density)
+            alive_cells = np.random.choice(num_cells, size=num_alive, replace=False)
+            X[alive_cells] = 1
+            X = X.reshape(num, *board_size, 1)
+
+        # compute the board state after the given number of steps
         Y = X.copy()
         for _ in range(steps):
             Y = self.model(Y).numpy()
+
         return (X, Y)
 
 
 if __name__ == '__main__':
 
     life = GameOfLife(show_model=True)
-    x, y = life.generate_dataset(steps=1, board_size=(3,3))
+    x, y = life.generate_dataset(steps=1, board_size=(32,32), num=100)
 
     ##life.setup_state(init='glider')
-    ##life.play(name='glider')
+    life.play(name='glider')
     ##life.animate_game(name='glider')
 
