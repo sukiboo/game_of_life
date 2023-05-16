@@ -39,7 +39,11 @@ if __name__ == '__main__':
     params_es = {'population': 100, 'sigma': .01, 'learning_rate': 1e-3}
     model_es, history_es = models.train_model_es(steps, data, epochs, params_es)
 
+    # train model via particle swarm optimization
+    params_ps = {'num_particles': 100}
+    model_ps, history_ps = models.train_model_ps(steps, data, epochs, params_ps)
+
     # visualize model training
     viz.plot_history({'model_bp': history_bp, 'model_ga': history_ga,
-                      'model_so': history_so, 'model_es': history_es})
+        'model_so': history_so, 'model_es': history_es, 'model_ps': model_ps})
 
