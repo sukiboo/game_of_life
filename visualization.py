@@ -107,7 +107,7 @@ def visualize_success(logs_dir, save=False):
                     ax.bar(i+.2, vals_fixed[algs[i]], width=.4)
                 ax.set_title(f'Convergence rate on {model_type} model '\
                              + f'with {activation} activation after {steps} steps')
-                plt.xticks(range(len(algs)), algs)
+                plt.xticks(range(len(algs)), algs, rotation=30)
                 plt.tight_layout()
                 if save:
                     savename = f'convergence_{steps}_{model_type}_{activation}'
@@ -144,17 +144,17 @@ def visualize_learning(logs_dir, save=False):
                     # plot average loss
                     loss_random = Loss[steps][model_type][activation]['random'][algs[i]]
                     loss_fixed = Loss[steps][model_type][activation]['fixed'][algs[i]]
-                    ax1.plot(loss_random, label='random', color=colors[2*i], linewidth=3)
-                    ax1.plot(loss_fixed, label='fixed', color=colors[2*i+1], linewidth=3)
-                    if (loss_random.size == 1) or (loss_fixed.size == 1):
+                    ax1.plot(loss_random, label='random', color=colors[(2*i)%12], linewidth=3)
+                    ax1.plot(loss_fixed, label='fixed', color=colors[(2*i+1)%12], linewidth=3)
+                    if (loss_random.size == 1) and (loss_fixed.size == 1):
                         plt.close()
                         continue
 
                     # plot average accuracy
                     acc_random = Acc[steps][model_type][activation]['random'][algs[i]]
                     acc_fixed = Acc[steps][model_type][activation]['fixed'][algs[i]]
-                    ax2.plot(acc_random, label='random', color=colors[2*i], linewidth=3)
-                    ax2.plot(acc_fixed, label='fixed', color=colors[2*i+1], linewidth=3)
+                    ax2.plot(acc_random, label='random', color=colors[(2*i)%12], linewidth=3)
+                    ax2.plot(acc_fixed, label='fixed', color=colors[(2*i+1)%12], linewidth=3)
 
                     ax1.set_title(f'{algs[i]} on {model_type} model '\
                                 + f'with {activation} activation after {steps} steps')
@@ -222,9 +222,9 @@ def plot_logs(logs_dir, save=False):
 
 if __name__ == '__main__':
 
-    ##plot_logs('./logs/dgs', save=False)
+    ##plot_logs('./logs/test', save=False)
     ##visualize_density(1, save=True)
     ##visualize_success('./logs/100', save=False)
-    ##visualize_learning('./logs/10', save=True)
+    visualize_learning('./logs/100', save=True)
     ##estimate_advantage('./logs/10')
     ##plot_glider(steps=4, save=True)

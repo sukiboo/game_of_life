@@ -45,15 +45,16 @@ if __name__ == '__main__':
 
     ##"""
     life = GameOfLife()
-    for steps in [1,2]:
-        for dataset in ['random']:
+    for steps in [1]:
+        for dataset in ['fixed']:
 
             # generate evaluation test set
             x_ts, y_ts = life.generate_dataset(
                 steps=steps, num=100, board_size=(100,100), density=.38, random_seed=2023)
             # get training set
             if dataset == 'fixed':
-                x_tr = np.expand_dims(np.load('./training_boards/x9_tr.npy'), [0,-1])
+                ##x_tr = np.expand_dims(np.load('./training_boards/x9_tr.npy'), [0,-1])
+                x_tr = np.expand_dims(np.load('./training_boards/x10_tr.npy'), [0,-1])
                 y_tr = life.predict(x_tr, steps=steps)
             else:
                 x_tr, y_tr = life.generate_dataset(
@@ -90,7 +91,8 @@ if __name__ == '__main__':
 
     # load training set
     dataset = 'fixed'
-    x_tr = np.expand_dims(np.load('./training_boards/x9_tr.npy'), [0,-1])
+    ##x_tr = np.expand_dims(np.load('./training_boards/x9_tr.npy'), [0,-1])
+    x_tr = np.expand_dims(np.load('./training_boards/x_old_tr.npy'), [0,-1])
     y_tr = life.predict(x_tr, steps=steps)
     ### generate trining set
     ##dataset = 'random'
