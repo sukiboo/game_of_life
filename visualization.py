@@ -203,11 +203,12 @@ def estimate_advantage(logs_dir):
 
 def plot_logs(logs_dir, save=False):
     """Plot loss values from the logs in the given directory"""
-    for log_name in os.listdir(logs_dir):
+    for log_name in sorted(os.listdir(logs_dir)):
         try:
             with open(f'./{logs_dir}/{log_name}','rb') as logfile:
                 log_data = pickle.load(logfile)
             fig, ax = plt.subplots(figsize=(8,5))
+            print(f'{log_name} success rate: {np.mean([l[0][1]==1 for l in log_data]):.2f}')
             for history in log_data:
                 ax.plot(history[1]['loss'], linewidth=3)
             ax.set_ylim(-.01, .26)
@@ -222,9 +223,10 @@ def plot_logs(logs_dir, save=False):
 
 if __name__ == '__main__':
 
-    ##plot_logs('./logs/test', save=False)
+    plot_logs('./logs/test', save=False)
     ##visualize_density(1, save=True)
     ##visualize_success('./logs/100', save=False)
-    visualize_learning('./logs/100', save=True)
+    ##visualize_learning('./logs/100', save=True)
     ##estimate_advantage('./logs/10')
     ##plot_glider(steps=4, save=True)
+

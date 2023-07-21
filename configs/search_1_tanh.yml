@@ -1,0 +1,27 @@
+# experiment parameters
+exp_params:
+    dataset: x10
+    num_steps: 1
+    num_tests: 10
+    model_type: recursive
+    activation: tanh
+    random_seed: 2023
+
+
+# training parameters
+train_params:
+    batch_size: 1
+    steps_per_epoch: 1
+    epochs: 10000
+
+
+# parameters for optimization algorithms
+algos:
+    Adadelta1: {learning_rate: 1.0e-1}
+    Adadelta2: {learning_rate: 3.0e-2}
+    Adadelta3: {learning_rate: 1.0e-2}
+    Adadelta4: {learning_rate: 3.0e-3}
+    Adadelta5: {learning_rate: 1.0e-3}
+    Adadelta6: {learning_rate: 3.0e-4}
+    Adadelta7: {learning_rate: 1.0e-4}
+

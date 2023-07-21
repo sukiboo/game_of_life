@@ -2,11 +2,6 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
 
-from methods.genetic_algorithm import GeneticAlgorithm
-from methods.evolution_strategy import EvolutionStrategy
-from methods.smoothing_optimization import SmoothingOptimization
-from methods.particle_swarm import ParticleSwarm
-
 
 def create_model_sequential(n, activation='relu', random_seed=0, name=None):
     """Construct sequential feedforward convolutional network to learn n-step GoF"""
@@ -72,39 +67,11 @@ def get_ground_truth_model(n, activation='relu'):
     ##return model
 
 
-def train_model_bp(model, data, params_opt, params_train):
+def train_model(model, alg, params_opt, params_train, data):
     """Train model via backpropagation"""
-    optimizer = getattr(tf.keras.optimizers, params_opt['name'])(**params_opt)
+    optimizer = getattr(tf.keras.optimizers, alg)(**params_opt)
     model.compile(optimizer=optimizer, loss='mse', metrics=['accuracy'])
     tqdm_callback = tfa.callbacks.TQDMProgressBar(show_epoch_progress=False)
     history = model.fit(*data, **params_train, verbose=0, callbacks=[tqdm_callback])
     return model, history.history
-
-
-def train_model_ga(model, data, params, params_train):
-    """Train model via genetic algorithm"""
-    ga = GeneticAlgorithm(**params)
-    history = ga.train(model, data, **params_train)
-    return model, history
-
-
-def train_model_so(model, data, params, params_train):
-    """Train model via smoothing-based optimization"""
-    so = SmoothingOptimization(**params)
-    history = so.train(model, data, **params_train)
-    return model, history
-
-
-def train_model_es(model, data, params, params_train):
-    """Train model via evolution strategy"""
-    es = EvolutionStrategy(**params)
-    history = es.train(model, data, **params_train)
-    return model, history
-
-
-def train_model_ps(model, data, params, params_train):
-    """Train model via particle swarm optimization"""
-    ps = ParticleSwarm(**params)
-    history = ps.train(model, data, **params_train)
-    return model, history
 
