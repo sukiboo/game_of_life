@@ -5,7 +5,8 @@ import tensorflow_addons as tfa
 
 def create_model_sequential(n, activation='relu', random_seed=0, name=None):
     """Construct sequential feedforward convolutional network to learn n-step GoF"""
-    tf.random.set_seed(random_seed)
+    ##tf.random.set_seed(random_seed)
+    tf.keras.utils.set_random_seed(random_seed)
     layers = [tf.keras.Input((None,None,1))]
     for _ in range(n):
         layers.append(tf.keras.layers.Conv2D(
@@ -21,7 +22,8 @@ def create_model_sequential(n, activation='relu', random_seed=0, name=None):
 
 def create_model_recursive(n, activation='relu', random_seed=0, name=None):
     """Construct recursive feedforward convolutional network to learn n-step GoF"""
-    tf.random.set_seed(random_seed)
+    ##tf.random.set_seed(random_seed)
+    tf.keras.utils.set_random_seed(random_seed)
     inputs = tf.keras.Input(shape=(None,None,1), name='input')
     conv1 = tf.keras.layers.Conv2D(
         2, kernel_size=(3,3), padding='same', activation=activation, name='conv1')
@@ -55,20 +57,10 @@ def get_ground_truth_model(n, activation='relu'):
     return model
 
 
-##def get_ground_truth_model(n):
-    ##"""Create model that simulates n-step GoF"""
-    ##model = create_model_recursive(n, activation='relu', name=f'{n}-step-GoF')
-    ##weights = [np.array([1,-1,1,-1,1,-1,1,-1,0,-1,1,-1,1,-1,1,-1,1,-1]).reshape(3,3,1,2),
-               ##np.array([-3,3]), np.array([-1,-1]).reshape(1,1,2,1), np.array([1])]
-    ##model.set_weights(weights)
-    ##model.compile(loss='mse', metrics=['accuracy'])
-    ##for layer in model.layers:
-        ##layer.trainable = False
-    ##return model
-
-
-def train_model(model, alg, params_opt, params_train, data):
+def train_model(model, alg, params_opt, params_train, data, random_seed=0):
     """Train model via backpropagation"""
+    ##tf.random.set_seed(random_seed)
+    tf.keras.utils.set_random_seed(random_seed)
     optimizer = getattr(tf.keras.optimizers, alg)(**params_opt)
     model.compile(optimizer=optimizer, loss='mse', metrics=['accuracy'])
     tqdm_callback = tfa.callbacks.TQDMProgressBar(show_epoch_progress=False)
