@@ -18,6 +18,8 @@ def test_algorithm(alg, params, train_params, exp_params, train_data, test_data)
 
     # train a model with a given algorithm
     logs = []
+    print(f'\nTesting {alg} on {num_steps}-step GoL with {model_type} model'\
+        + f' and {activation} activation on {dataset} dataset:\n')
     for t in range(num_tests):
 
         # create the model
@@ -30,9 +32,10 @@ def test_algorithm(alg, params, train_params, exp_params, train_data, test_data)
             model = models.create_model_sequential(num_steps, activation, random_seed=t)
 
         # train the model
-        ##model, history = models.train_model(model, alg, params, train_params, train_data)
-        # hyperparameter search clunky workaround
-        model, history = models.train_model(model, alg[:-1], params, train_params, train_data)
+        model, history = models.train_model(model, alg, params, train_params, train_data, random_seed=t)
+        '''hyperparameter search clunky workaround'''
+        # model, history = models.train_model(model, alg[:-1], params,
+            # train_params, train_data, random_seed=t)
 
         # save loss values
         logs.append([model.evaluate(*test_data), history])
@@ -45,7 +48,7 @@ def test_algorithm(alg, params, train_params, exp_params, train_data, test_data)
 
 if __name__ == '__main__':
 
-    config_file = 'search_1_adadelta.yml'
+    config_file = '2_rec_relu_fixed.yml'
 
     # read configs
     configs = yaml.safe_load(open(f'./configs/{config_file}'))
@@ -66,7 +69,7 @@ if __name__ == '__main__':
     if dataset == 'random':
         x_tr, y_tr = life.generate_dataset(
             steps=num_steps, num=train_params['epochs'],
-            board_size=(32,32), density=.38, random_seed=random_seed)
+            board_size=(64,64), density=.38, random_seed=random_seed)
     else:
         x_tr = np.expand_dims(np.load(f'./training_boards/{dataset}.npy'), [0,-1])
         y_tr = life.predict(x_tr, steps=num_steps)
@@ -78,48 +81,12 @@ if __name__ == '__main__':
     # run experiments
     for alg, params in algos.items():
         test_algorithm(alg, params, train_params, exp_params, (x_tr,y_tr), (x_ts,y_ts))
-
-
-    """
-    # generate evaluation test set
-    life = GameOfLife()
-    x_ts, y_ts = life.generate_dataset(
-        steps=steps, num=100, board_size=(100,100), density=.38, random_seed=2023)
-
-    # load training set
-    dataset = 'fixed'
-    ##x_tr = np.expand_dims(np.load('./training_boards/x9_tr.npy'), [0,-1])
-    x_tr = np.expand_dims(np.load('./training_boards/x_old_tr.npy'), [0,-1])
-    y_tr = life.predict(x_tr, steps=steps)
-    ### generate trining set
-    ##dataset = 'random'
-    ##x_tr, y_tr = life.generate_dataset(
-        ##steps=steps, num=10000, board_size=(32,32), density=.38, random_seed=2023)
-
-    # parameters for optimization algorithms
-    params_train = {'batch_size': 1, 'steps_per_epoch': 1, 'epochs': 30000}
-    params = [
-        {'name': 'Adadelta', 'learning_rate': 1e-1},
-        {'name': 'Adafactor', 'learning_rate': 2e-2},#?
-        {'name': 'Adagrad', 'learning_rate': 3e-2},
-        {'name': 'Adam', 'learning_rate': 3e-4},
-        {'name': 'AdamW', 'learning_rate': 3e-4},#?
-        {'name': 'Adamax', 'learning_rate': 1e-3},
-        {'name': 'Ftrl', 'learning_rate': 5e-2},
-        {'name': 'Nadam', 'learning_rate': 3e-4},
-        {'name': 'RMSprop', 'learning_rate': 3e-4},
-        {'name': 'SGD', 'momentum': .5, 'learning_rate': 1e-2},
-    ]
-
-    '''
-    for params_opt in params:
-        for activation in ['relu', 'tanh']:
-            for model_type in ['recursive', 'sequential']:
-                test_algorithm(params_opt, params_train, activation, model_type)
-    '''
-
-    ##params_opt = {'name': 'AdamW', 'learning_rate': 3e-4}
-    ##test_algorithm(params_opt, params_train, activation='tanh', model_type='recursive')
-    """
-
+    '''hyperparameter search'''
+    # print(f'\n\n======= HYPERPARAMETER SEARCH {config_file} ======')
+    # for alg in ['Adadelta', 'Adafactor', 'Adagrad', 'Adam', 'Adamax',
+    #             'AdamW', 'Ftrl', 'Nadam', 'RMSprop', 'SGD']:
+    #     print(f'\n\ntesting {alg}\n')
+    #     for name, params in algos.items():
+    #         test_algorithm(name.replace('Algorithm', alg), params,
+    #                        train_params, exp_params, (x_tr,y_tr), (x_ts,y_ts))
 

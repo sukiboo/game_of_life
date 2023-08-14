@@ -1,0 +1,30 @@
+# experiment parameters
+exp_params:
+    dataset: random
+    num_steps: 2
+    num_tests: 100
+    model_type: sequential
+    activation: relu
+    random_seed: 2023
+
+
+# training parameters
+train_params:
+    batch_size: 1
+    steps_per_epoch: 1
+    epochs: 10000
+
+
+# parameters for optimization algorithms
+algos:
+    Adadelta: {learning_rate: 1.0e-1} #
+    Adafactor: {learning_rate: 1.0e-1} #
+    Adagrad: {learning_rate: 1.0e-1}
+    Adam: {learning_rate: 1.0e-3}
+    Adamax: {learning_rate: 3.0e-3}
+    AdamW: {learning_rate: 3.0e-3}
+    Ftrl: {learning_rate: 1.0e-1} #
+    Nadam: {learning_rate: 1.0e-1} #
+    RMSprop: {learning_rate: 1.0e-1} #
+    SGD: {learning_rate: 1.0e-1, momentum: .5} #
+
