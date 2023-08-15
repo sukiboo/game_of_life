@@ -5,7 +5,6 @@ import tensorflow_addons as tfa
 
 def create_model_sequential(n, activation='relu', random_seed=0, name=None):
     """Construct sequential feedforward convolutional network to learn n-step GoF"""
-    ##tf.random.set_seed(random_seed)
     tf.keras.utils.set_random_seed(random_seed)
     layers = [tf.keras.Input((None,None,1))]
     for _ in range(n):
@@ -22,7 +21,6 @@ def create_model_sequential(n, activation='relu', random_seed=0, name=None):
 
 def create_model_recursive(n, activation='relu', random_seed=0, name=None):
     """Construct recursive feedforward convolutional network to learn n-step GoF"""
-    ##tf.random.set_seed(random_seed)
     tf.keras.utils.set_random_seed(random_seed)
     inputs = tf.keras.Input(shape=(None,None,1), name='input')
     conv1 = tf.keras.layers.Conv2D(
@@ -59,9 +57,8 @@ def get_ground_truth_model(n, activation='relu'):
 
 def train_model(model, alg, params_opt, params_train, data, random_seed=0):
     """Train model via backpropagation"""
-    ##tf.random.set_seed(random_seed)
     tf.keras.utils.set_random_seed(random_seed)
-    optimizer = getattr(tf.keras.optimizers, alg)(**params_opt)
+    optimizer = getattr(tf.keras.optimizers, alg.rstrip('0123456789'))(**params_opt)
     model.compile(optimizer=optimizer, loss='mse', metrics=['accuracy'])
     tqdm_callback = tfa.callbacks.TQDMProgressBar(show_epoch_progress=False)
     history = model.fit(*data, **params_train, verbose=0, callbacks=[tqdm_callback])

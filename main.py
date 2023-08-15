@@ -31,24 +31,31 @@ def test_algorithm(alg, params, train_params, exp_params, train_data, test_data)
                 return
             model = models.create_model_sequential(num_steps, activation, random_seed=t)
 
-        # train the model
-        model, history = models.train_model(model, alg, params, train_params, train_data, random_seed=t)
-        '''hyperparameter search clunky workaround'''
-        # model, history = models.train_model(model, alg[:-1], params,
-            # train_params, train_data, random_seed=t)
-
-        # save loss values
+        # train the model and save loss values
+        model, history = models.train_model(model, alg, params,
+                                            train_params, train_data, random_seed=t)
         logs.append([model.evaluate(*test_data), history])
 
+    # save experiment logs
     exp_name = f'{num_steps}_{model_type}_{activation}_{alg}_{dataset}'
     print(f'{exp_name} success rate: {np.mean([l[0][1]==1 for l in logs]):.2f}\n')
     with open(f'./logs/{exp_name}_{num_tests}.pkl', 'wb') as logfile:
         pickle.dump(logs, logfile)
 
 
-if __name__ == '__main__':
+def search_parameters(algos, train_params, exp_params, train_data, test_data):
+    """Perform hyperparameter search for all algorithms"""
+    print(f'\n\n====== HYPERPARAMETER SEARCH {config_file} ======')
+    for alg in ['Adadelta', 'Adafactor', 'Adagrad', 'Adam', 'Adamax',
+                'AdamW', 'Ftrl', 'Nadam', 'RMSprop', 'SGD']:
+        print(f'\n\ntesting {alg}\n')
+        for name, params in algos.items():
+            test_algorithm(name.replace('Algorithm', alg), params,
+                           train_params, exp_params, train_data, test_data)
 
-    config_file = '2_rec_relu_fixed.yml'
+
+def run_experiments(config_file, search=False):
+    """Setup and run experiments"""
 
     # read configs
     configs = yaml.safe_load(open(f'./configs/{config_file}'))
@@ -78,15 +85,17 @@ if __name__ == '__main__':
     x_ts, y_ts = life.generate_dataset(
         steps=num_steps, num=100, board_size=(100,100), density=.38, random_seed=random_seed)
 
-    # run experiments
-    for alg, params in algos.items():
-        test_algorithm(alg, params, train_params, exp_params, (x_tr,y_tr), (x_ts,y_ts))
-    '''hyperparameter search'''
-    # print(f'\n\n======= HYPERPARAMETER SEARCH {config_file} ======')
-    # for alg in ['Adadelta', 'Adafactor', 'Adagrad', 'Adam', 'Adamax',
-    #             'AdamW', 'Ftrl', 'Nadam', 'RMSprop', 'SGD']:
-    #     print(f'\n\ntesting {alg}\n')
-    #     for name, params in algos.items():
-    #         test_algorithm(name.replace('Algorithm', alg), params,
-    #                        train_params, exp_params, (x_tr,y_tr), (x_ts,y_ts))
+    if search:
+        # perform hyperparameter search
+        search_parameters(algos, train_params, exp_params, (x_tr,y_tr), (x_ts,y_ts))
+    else:
+        # run experiments
+        for alg, params in algos.items():
+            test_algorithm(alg, params, train_params, exp_params, (x_tr,y_tr), (x_ts,y_ts))
+
+
+if __name__ == '__main__':
+
+    config_file = 'search_1_relu_fixed.yml'
+    run_experiments(config_file, search=True)
 

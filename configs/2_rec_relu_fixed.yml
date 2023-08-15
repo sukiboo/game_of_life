@@ -2,7 +2,7 @@
 exp_params:
     dataset: fixed
     num_steps: 2
-    num_tests: 10
+    num_tests: 100
     model_type: recursive
     activation: relu
     random_seed: 2023
