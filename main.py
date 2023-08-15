@@ -1,9 +1,10 @@
-import numpy as np
-from game_of_life import GameOfLife
-import models
-import visualization as viz
-import pickle
 import yaml
+import pickle
+import argparse
+import numpy as np
+
+import models
+from game_of_life import GameOfLife
 
 
 def test_algorithm(alg, params, train_params, exp_params, train_data, test_data):
@@ -54,7 +55,7 @@ def search_parameters(algos, train_params, exp_params, train_data, test_data):
                            train_params, exp_params, train_data, test_data)
 
 
-def run_experiments(config_file, search=False):
+def run_experiments(config_file):
     """Setup and run experiments"""
 
     # read configs
@@ -85,7 +86,7 @@ def run_experiments(config_file, search=False):
     x_ts, y_ts = life.generate_dataset(
         steps=num_steps, num=100, board_size=(100,100), density=.38, random_seed=random_seed)
 
-    if search:
+    if config_file.startswith('search'):
         # perform hyperparameter search
         search_parameters(algos, train_params, exp_params, (x_tr,y_tr), (x_ts,y_ts))
     else:
@@ -96,6 +97,15 @@ def run_experiments(config_file, search=False):
 
 if __name__ == '__main__':
 
-    config_file = 'search_1_relu_fixed.yml'
-    run_experiments(config_file, search=True)
+    # parse the configs
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config',
+                        default='1_tanh_fixed.yml',
+                        help='name of the config file in "./configs/"')
 
+    # read the inputs
+    args = parser.parse_args()
+    config_file = args.config
+
+    # run experiments
+    run_experiments(config_file)
